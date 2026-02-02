@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load cart_extras %}
+{% block title %}Track Order{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Track Order</h1>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.order_id.id_for_label }}">Order ID</label>
+            {{ form.order_id }}
+            {% for err in form.order_id.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+          <button class="btn btn-primary" type="submit">Track</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    {% if order %}
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h6 mb-3">Order Details</h2>
+          <div class="mb-2"><span class="text-muted">Order ID:</span> <span class="fw-semibold">{{ order.order_id }}</span></div>
+          <div class="mb-2"><span class="text-muted">Status:</span> <span class="fw-semibold">{{ order.get_status_display }}</span></div>
+          <div class="mb-2"><span class="text-muted">Payment:</span> <span class="fw-semibold">{{ order.payment_mode }}</span></div>
+          <div class="mb-3"><span class="text-muted">Placed:</span> {{ order.created_at|date:"Y-m-d H:i" }}</div>
+
+          <h3 class="h6 mt-4">Items</h3>
+          <ul class="list-group">
+            {% for it in order.items.all %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ it.product.name }}</div>
+                  <div class="small text-muted">Qty: {{ it.quantity }}</div>
+                </div>
+                <div class="fw-semibold">${{ it.unit_price|mul:it.quantity }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <h3 class="h6 mt-4">Delivery</h3>
+          <div class="small text-muted">
+            {{ order.address }}<br>
+            {{ order.city }}, {{ order.state }} {{ order.zipcode }}<br>
+            Contact: {{ order.contact_number }}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-secondary">Enter an Order ID to view its status.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

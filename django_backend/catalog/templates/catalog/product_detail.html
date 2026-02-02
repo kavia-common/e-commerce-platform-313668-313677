@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <img class="card-img-top" src="{{ product.image.url }}" alt="{{ product.name }}">
+    </div>
+  </div>
+  <div class="col-md-7">
+    <h1 class="h4 mb-2">{{ product.name }}</h1>
+    <div class="fs-5 fw-semibold mb-3">${{ product.price }}</div>
+
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'cart:add_to_cart' product.id %}">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit">Add to cart</button>
+      </form>
+    {% else %}
+      <div class="alert alert-secondary">Login to add this item to your cart.</div>
+    {% endif %}
+
+    <hr class="my-4">
+
+    <h2 class="h6">Key Features</h2>
+    <ul class="mb-4">
+      {% for f in product.features.all %}
+        <li>{{ f.text }}</li>
+      {% empty %}
+        <li class="text-muted">No features listed.</li>
+      {% endfor %}
+    </ul>
+
+    <h2 class="h6">Reviews</h2>
+    <div class="mb-3">
+      {% for r in reviews %}
+        <div class="border rounded p-3 mb-2 bg-white">
+          <div class="small text-muted mb-1">
+            {{ r.author.username }} · {{ r.created_at|date:"Y-m-d H:i" }}
+          </div>
+          <div>{{ r.body }}</div>
+        </div>
+      {% empty %}
+        <div class="text-muted">No reviews yet.</div>
+      {% endfor %}
+    </div>
+
+    {% if user.is_authenticated %}
+      {% if can_review %}
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h3 class="h6 mb-2">Write a review</h3>
+            <form method="post" action="{% url 'reviews:create' product.id %}">
+              {% csrf_token %}
+              {{ review_form.non_field_errors }}
+              <div class="mb-3">
+                <label class="form-label" for="{{ review_form.body.id_for_label }}">Review</label>
+                {{ review_form.body }}
+                {% for err in review_form.body.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+              </div>
+              <button class="btn btn-primary" type="submit">Submit review</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          Only customers who have ordered this product can write a review.
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

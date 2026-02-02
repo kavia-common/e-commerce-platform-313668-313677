@@ -1,0 +1,13 @@
+:root {
+  --brand-primary: #3b82f6;
+  --brand-bg: #f9fafb;
+}
+
+body {
+  background: var(--brand-bg);
+}
+
+.card-img-top {
+  object-fit: cover;
+  height: 200px;
+}
